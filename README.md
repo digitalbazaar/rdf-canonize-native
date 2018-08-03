@@ -1,9 +1,10 @@
-# rdf-canonize
+# rdf-canonize-native
 
 [![Build status](https://img.shields.io/travis/digitalbazaar/rdf-canonize.svg)](https://travis-ci.org/digitalbazaar/rdf-canonize)
 [![Dependency Status](https://img.shields.io/david/digitalbazaar/rdf-canonize.svg)](https://david-dm.org/digitalbazaar/rdf-canonize)
 
-An implementation of the [RDF Dataset Normalization Algorithm][] in JavaScript.
+A native implementation of the [RDF Dataset Normalization Algorithm][] for
+[rdf-canonize][] and Node.js.
 
 Introduction
 ------------
@@ -12,6 +13,8 @@ Introduction
 
 Installation
 ------------
+
+Currently this module is intended to be used via the [rdf-canonize][].
 
 ### node.js + npm
 
@@ -52,6 +55,8 @@ canonize.canonize(dataset, {algorithm: 'URDNA2015'}, function(err, canonical) {
 Related Modules
 ---------------
 
+* [rdf-canonize][]: The JavaScript implementation of the [RDF Dataset
+  Normalization Algorithm][].
 * [jsonld.js][]: An implementation of the [JSON-LD][] specification.
 
 Tests
@@ -94,7 +99,7 @@ Source
 
 The source code for this library is available at:
 
-https://github.com/digitalbazaar/rdf-canonize
+https://github.com/digitalbazaar/rdf-canonize-native
 
 Commercial Support
 ------------------
@@ -106,3 +111,4 @@ Commercial support for this library is available upon request from
 [JSON-LD]: https://json-ld.org/
 [RDF Dataset Normalization Algorithm]: https://json-ld.github.io/normalization/
 [jsonld.js]: https://github.com/digitalbazaar/jsonld.js
+[rdf-canonize-native]: https://github.com/digitalbazaar/rdf-canonize-native
