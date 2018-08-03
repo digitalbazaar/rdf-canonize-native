@@ -1,7 +1,7 @@
 # rdf-canonize-native
 
-[![Build status](https://img.shields.io/travis/digitalbazaar/rdf-canonize.svg)](https://travis-ci.org/digitalbazaar/rdf-canonize)
-[![Dependency Status](https://img.shields.io/david/digitalbazaar/rdf-canonize.svg)](https://david-dm.org/digitalbazaar/rdf-canonize)
+[![Build status](https://img.shields.io/travis/digitalbazaar/rdf-canonize-native.svg)](https://travis-ci.org/digitalbazaar/rdf-canonize-native)
+[![Dependency Status](https://img.shields.io/david/digitalbazaar/rdf-canonize-native.svg)](https://david-dm.org/digitalbazaar/rdf-canonize-native)
 
 A native implementation of the [RDF Dataset Normalization Algorithm][] for
 [rdf-canonize][] and Node.js.
