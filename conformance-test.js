@@ -39,7 +39,6 @@ if(_nodejs) {
   window.Promise = require('es6-promise').Promise;
   assert = require('chai').assert;
   require('mocha/mocha');
-  require('mocha-phantomjs/lib/mocha-phantomjs/core_extensions');
   program = {};
   for(let i = 0; i < system.args.length; ++i) {
     const arg = system.args[i];
@@ -182,10 +181,7 @@ function addTest(manifest, test) {
 
   const testInfo = TEST_TYPES[getTestType(test)];
   const params = testInfo.params.map(param => param(test));
-  // custom params for js only async mode
-  const jsParams = testInfo.params.map(param => param(test));
-  jsParams[1].usePureJavaScript = true;
-  // custom params for native only async mode (if available)
+  // custom params for native only async mode
   const nativeParams = testInfo.params.map(param => param(test));
   nativeParams[1].usePureJavaScript = false;
   const createCallback = done => (err, result) => {
@@ -212,14 +208,6 @@ function addTest(manifest, test) {
     }
   };
 
-  // run async js test
-  it(description + ' (asynchronous js)', function(done) {
-    this.timeout(5000);
-    const callback = createCallback(done);
-    const promise = canonize.canonize.apply(null, jsParams);
-    promise.then(callback.bind(null, null), callback);
-  });
-
   if(params[1].algorithm === 'URDNA2015') {
     // run async native test
     it(description + ' (asynchronous native)', function(done) {
@@ -229,19 +217,6 @@ function addTest(manifest, test) {
       promise.then(callback.bind(null, null), callback);
     });
   }
-
-  // run sync test
-  it(description + ' (synchronous js)', function(done) {
-    this.timeout(5000);
-    const callback = createCallback(done);
-    let result;
-    try {
-      result = canonize.canonizeSync.apply(null, jsParams);
-    } catch(e) {
-      return callback(e);
-    }
-    callback(null, result);
-  });
 
   if(params[1].algorithm === 'URDNA2015') {
     // run sync test

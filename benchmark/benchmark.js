@@ -167,10 +167,6 @@ function addTest(manifest, test) {
   const testInfo = TEST_TYPES[getTestType(test)];
   const params = testInfo.params.map(param => param(test));
 
-  // custom params for js only async mode
-  const jsParams = testInfo.params.map(param => param(test));
-  jsParams[1].usePureJavaScript = true;
-
   // custom params for native only async mode (if available)
   const nativeParams = testInfo.params.map(param => param(test));
   nativeParams[1].usePureJavaScript = false;
@@ -180,37 +176,6 @@ function addTest(manifest, test) {
   // number of parallel operations
   const N = 10;
 
-  // run async js benchmark
-  suite.add({
-    name: namepath.concat([description, '(asynchronous js)']).join(' / '),
-    defer: true,
-    fn: function(deferred) {
-      canonize.canonize(...jsParams).then(() => deferred.resolve());
-    }
-  });
-  // run async js benchmark x N
-  suite.add({
-    name: namepath.concat(
-      [description, `(asynchronous js x ${N})`]).join(' / '),
-    defer: true,
-    fn: function(deferred) {
-      const all = [];
-      for(let i = 0; i < N; ++i) {
-        all.push(canonize.canonize(...jsParams));
-      }
-      Promise.all(all).then(() => deferred.resolve());
-    }
-  });
-  /*
-  // run async js benchmark (callback)
-  suite.add({
-    name: namepath.concat([description, '(asynchronous js / cb)']).join(' / '),
-    defer: true,
-    fn: function(deferred) {
-      canonize.canonize(...jsParams, (err, output) => deferred.resolve());
-    }
-  });
-  */
   // run async native benchmark
   suite.add({
     name: namepath.concat([description, '(asynchronous native)']).join(' / '),
@@ -233,28 +198,6 @@ function addTest(manifest, test) {
     }
   });
 
-  // run sync js benchmark
-  suite.add({
-    name: namepath.concat([description, '(synchronous js)']).join(' / '),
-    defer: true,
-    fn: function(deferred) {
-      canonize.canonizeSync(...jsParams);
-      deferred.resolve();
-    }
-  });
-  // run sync js benchmark x N
-  suite.add({
-    name: namepath.concat(
-      [description, `(synchronous js x ${N})`]).join(' / '),
-    defer: true,
-    fn: function(deferred) {
-      const all = [];
-      for(let i = 0; i < N; ++i) {
-        all.push(canonize.canonizeSync(...jsParams));
-      }
-      Promise.all(all).then(() => deferred.resolve());
-    }
-  });
   // run sync native benchmark
   suite.add({
     name: namepath.concat([description, '(synchronous native)']).join(' / '),
