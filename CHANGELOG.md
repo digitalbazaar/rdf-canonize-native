@@ -1,6 +1,12 @@
 # rdf-canonize-native ChangeLog
 
-## 0.1.0 - 2018-xx-xx
+## 0.3.0 - 2018-xx-xx
+
+### Notes
+- Code initially cloned from [rdf-canonize][] to preserve the native binding
+  history. Versioning will be started at 0.3.0 such that there is less
+  confusion due to old release commit messages. This version will not track
+  the [rdf-canonize][] versions going forward.
 
 ### Fixed
 - Accept N-Quads upper case language tag.
