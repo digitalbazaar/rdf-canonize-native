@@ -2,6 +2,9 @@
 
 ## 0.1.0 - 2018-xx-xx
 
+### Fixed
+- Accept N-Quads upper case language tag.
+
 ### Changed
 - Only build and export native implementations.
 
