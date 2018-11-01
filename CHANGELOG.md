@@ -4,6 +4,7 @@
 
 ### Fixed
 - Accept N-Quads upper case language tag.
+- Improve acceptable N-Quads blank node labels.
 
 ### Changed
 - Only build and export native implementations.
