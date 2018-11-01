@@ -5,6 +5,7 @@
 ### Fixed
 - Accept N-Quads upper case language tag.
 - Improve acceptable N-Quads blank node labels.
+- Missing space in named graph serialization.
 
 ### Changed
 - Only build and export native implementations.
