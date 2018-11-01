@@ -14,7 +14,7 @@ Introduction
 Installation
 ------------
 
-Currently this module is intended to be used via the [rdf-canonize][].
+Currently this module is intended to be used via [rdf-canonize][].
 
 ### node.js + npm
 
@@ -111,4 +111,4 @@ Commercial support for this library is available upon request from
 [JSON-LD]: https://json-ld.org/
 [RDF Dataset Normalization Algorithm]: https://json-ld.github.io/normalization/
 [jsonld.js]: https://github.com/digitalbazaar/jsonld.js
-[rdf-canonize-native]: https://github.com/digitalbazaar/rdf-canonize-native
+[rdf-canonize]: https://github.com/digitalbazaar/rdf-canonize
