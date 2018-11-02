@@ -1,6 +1,6 @@
 # rdf-canonize-native ChangeLog
 
-## 0.3.0 - 2018-10-01
+## 0.3.0 - 2018-11-01
 
 ### Notes
 - Code initially cloned from [rdf-canonize][] to preserve the native binding
