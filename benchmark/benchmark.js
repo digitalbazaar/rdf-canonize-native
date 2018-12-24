@@ -123,7 +123,7 @@ function addManifest(manifest) {
 
 // i null for random, i number for incremental hashes mode
 function _bench({description, params, minSamples}) {
-  let options = {
+  const options = {
     name: description,
     defer: true,
     fn: function(deferred) {
@@ -384,4 +384,4 @@ function basename(filename) {
   return filename.substr(idx + 1);
 }
 
-})()
+})();
