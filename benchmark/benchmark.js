@@ -37,16 +37,16 @@ if(!TEST_SUITE) {
 }
 const ROOT_MANIFEST_DIR = resolvePath(TEST_SUITE);
 const TEST_TYPES = {
-  'rdfn:Urgna2012EvalTest': {
-    params: [
-      parseNQuads(readTestNQuads('action')),
-      createTestOptions({
-        algorithm: 'URGNA2012',
-        inputFormat: 'application/nquads',
-        format: 'application/nquads'
-      })
-    ]
-  },
+  // 'rdfn:Urgna2012EvalTest': {
+  //   params: [
+  //     parseNQuads(readTestNQuads('action')),
+  //     createTestOptions({
+  //       algorithm: 'URGNA2012',
+  //       inputFormat: 'application/nquads',
+  //       format: 'application/nquads'
+  //     })
+  //   ]
+  // },
   'rdfn:Urdna2015EvalTest': {
     params: [
       parseNQuads(readTestNQuads('action')),
