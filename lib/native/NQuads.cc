@@ -14,8 +14,12 @@
 #include <sstream>
 #include <vector>
 
+#include <iostream>
+
 using namespace std;
 using namespace RdfCanonize;
+
+string unescape(std::string const& s);
 
 static string RDF_LANGSTRING =
   "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
@@ -68,13 +72,18 @@ string NQuads::serializeQuad(const Quad& quad) {
   } else {
     Literal* literal = (Literal*)o;
     // TODO: optimize
-    string escaped = o->value;
-    escaped = regex_replace(escaped, REGEX_BACK_SLASH, "\\\\");
-    escaped = regex_replace(escaped, REGEX_TAB, "\\t");
-    escaped = regex_replace(escaped, REGEX_LF, "\\n");
-    escaped = regex_replace(escaped, REGEX_CR, "\\r");
-    escaped = regex_replace(escaped, REGEX_QUOTE, "\\\"");
-    nquad << "\"" << escaped << "\"";
+    // string escaped = o->value;
+    // escaped = regex_replace(escaped, REGEX_BACK_SLASH, "\\\\");
+    // escaped = regex_replace(escaped, REGEX_TAB, "\\t");
+    // escaped = regex_replace(escaped, REGEX_LF, "\\n");
+    // escaped = regex_replace(escaped, REGEX_CR, "\\r");
+    // escaped = regex_replace(escaped, REGEX_QUOTE, "\\\"");
+
+    // string escaped = o->value;
+    // string escaped = unescape(o->value);
+
+    // cout << escaped;
+    nquad << "\"" << unescape(o->value) << "\"";
     if(literal->datatype != NULL) {
       if(literal->datatype->value == RDF_LANGSTRING) {
         if(literal->language.size() != 0) {
@@ -96,4 +105,29 @@ string NQuads::serializeQuad(const Quad& quad) {
 
   nquad << " .\n";
   return nquad.str();
+}
+
+string unescape(std::string const& s) {
+  string res;
+  string::const_iterator it = s.begin();
+  while (it != s.end())
+  {
+    char c = *it++;
+    if (c == '\\' && it != s.end())
+    {
+      switch (*it++) {
+        case '\\': c = '\\'; break;
+        case 'n': c = '\n'; break;
+        case 't': c = '\t'; break;
+        // all other escapes
+        default:
+        // invalid escape sequence - skip it. alternatively you can copy it
+        // as is, throw an exception...
+        continue;
+      }
+    }
+    res += c;
+  }
+
+  return res;
 }
