@@ -46,8 +46,10 @@
     "chai": "^4.2.0",
     "commander": "^2.19.0",
     "core-js": "^2.5.1",
+    "jsonld": "^1.2.1",
     "mocha": "^5.2.0",
-    "regenerator-runtime": "^0.12.1"
+    "regenerator-runtime": "^0.12.1",
+    "uuid": "^3.3.2"
   },
   "engines": {
     "node": ">=6"
