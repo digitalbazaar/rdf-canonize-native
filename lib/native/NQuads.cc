@@ -118,6 +118,7 @@ string unescape(std::string const& s) {
       switch (*it++) {
         case '\\': c = '\\'; break;
         case 'n': c = '\n'; break;
+        case 'r': c = '\r'; break;
         case 't': c = '\t'; break;
         // all other escapes
         default:
