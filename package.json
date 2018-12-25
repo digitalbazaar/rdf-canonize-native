@@ -38,7 +38,9 @@
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "commander": "^2.19.0",
-    "mocha": "^5.2.0"
+    "jsonld": "^1.2.1",
+    "mocha": "^5.2.0",
+    "uuid": "^3.3.2"
   },
   "engines": {
     "node": ">=8"
