@@ -4,8 +4,6 @@
       "target_name": "urdna2015",
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],
-      "cflags!": [ "-fno-exceptions" ],
-      "cflags_cc!": [ "-fno-exceptions" ],
       "sources": [
         "lib/native/IdentifierIssuer.cc",
         "lib/native/MessageDigest.cc",
