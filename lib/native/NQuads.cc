@@ -52,23 +52,25 @@ string NQuads::serializeQuad(const Quad& quad) {
   Term* o = quad.object;
   Term* g = quad.graph;
 
-  ostringstream nquad;
+  // ostringstream nquad;
+  string nquad;
 
   // subject and predicate can only be named or blank nodes, not literals
   for(Term* t : {s, p}) {
     if(t->termType == TermType::NAMED_NODE) {
-      nquad << "<" << t->value << ">";
+      // nquad << "<" << t->value << ">";
+      nquad += "<" + t->value + ">";
     } else {
-      nquad << t->value;
+      nquad += t->value;
     }
-    nquad << " ";
+    nquad += " ";
   }
 
   // object is named or blank node or literal
   if(o->termType == TermType::NAMED_NODE) {
-    nquad << "<" << o->value << ">";
+    nquad += "<" + o->value + ">";
   } else if(o->termType == TermType::BLANK_NODE) {
-    nquad << o->value;
+    nquad += o->value;
   } else {
     Literal* literal = (Literal*)o;
     // TODO: optimize
@@ -83,14 +85,14 @@ string NQuads::serializeQuad(const Quad& quad) {
     // string escaped = unescape(o->value);
 
     // cout << escaped;
-    nquad << "\"" << unescape(o->value) << "\"";
+    nquad += "\"" + unescape(o->value) + "\"";
     if(literal->datatype != NULL) {
       if(literal->datatype->value == RDF_LANGSTRING) {
         if(literal->language.size() != 0) {
-          nquad << "@" << literal->language;
+          nquad += "@" + literal->language;
         }
       } else if(literal->datatype->value != XSD_STRING) {
-        nquad << "^^<" << literal->datatype->value << ">";
+        nquad += "^^<" + literal->datatype->value + ">";
       }
     }
   }
@@ -98,13 +100,13 @@ string NQuads::serializeQuad(const Quad& quad) {
   // graph can only be a NamedNode or a BlankNode (or DefaultGraph, but that
   // does not add to the `nquad`), not a literal
   if(g->termType == TermType::NAMED_NODE) {
-    nquad << " <" << g->value << ">";
+    nquad += " <" + g->value + ">";
   } else if(g->termType == TermType::BLANK_NODE) {
-    nquad << " " << g->value;
+    nquad += " " + g->value;
   }
 
-  nquad << " .\n";
-  return nquad.str();
+  nquad += " .\n";
+  return nquad;
 }
 
 string unescape(std::string const& s) {
