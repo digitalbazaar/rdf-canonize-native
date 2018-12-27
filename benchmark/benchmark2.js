@@ -42,15 +42,31 @@ async function a() {
   }
 }
 
+function b() {
+  for(const n of nquads) {
+    canonize.canonizeSync(n, {
+      algorithm: 'URDNA2015',
+      inputFormat: 'application/nquads',
+      format: 'application/nquads',
+      usePureJavaScript: false,
+    });
+  }
+}
+
 run().then(() => {
   return new Promise(resolve => {
     suite
-      .add('A', {
-        name: 'One',
+      .add('Async', {
+        name: 'Async',
         defer: true,
         fn: function(deferred) {
           a().then(() => deferred.resolve());
         }
+      })
+      .add('Sync', {
+        name: 'Sync',
+        false: true,
+        fn: b
       })
       .on('start', () => {
         console.log('Benchmarking...');
