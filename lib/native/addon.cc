@@ -40,8 +40,10 @@ public:
   Urdna2015Worker(
     Urdna2015 urdna2015,
     Dataset* dataset,
+    Napi::Promise::Deferred deferred,
     const Napi::Function& callback
-  ) : AsyncWorker(callback), urdna2015(urdna2015), dataset(dataset) {}
+  ) : AsyncWorker(callback), urdna2015(urdna2015), dataset(dataset),
+  deferred(deferred) {}
   ~Urdna2015Worker() {
     delete dataset;
   }
@@ -60,14 +62,16 @@ public:
   void OnOK () {
     // HandleScope scope;
     Napi::Env env = Env();
-
-    Callback().MakeCallback(
-      Receiver().Value(),
-      {
-        env.Null(),
-        Napi::String::New(env, output.c_str())
-      }
-    );
+    Napi::HandleScope scope(env);
+    deferred.Resolve(String::New(env, output.c_str()));
+    Callback().Call({});
+    // Callback().MakeCallback(
+    //   Receiver().Value(),
+    //   {
+    //     env.Null(),
+    //     Napi::String::New(env, output.c_str())
+    //   }
+    // );
 
     // Napi::Value argv[] = {
     //   Null(),
@@ -81,6 +85,7 @@ private:
   Urdna2015 urdna2015;
   Dataset* dataset;
   std::string output;
+  Napi::Promise::Deferred deferred;
 };
 
 static bool fillDataset(
@@ -95,21 +100,22 @@ static bool createTerm(
   const Napi::String& valueKey,
   const Napi::String& datatypeKey,
   const Napi::String& languageKey);
+Napi::Value EmptyCallback(const Napi::CallbackInfo& info);
 
-void Main(const Napi::CallbackInfo& info) {
+Napi::Value Main(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   // ensure first argument is an object
   if(!info[0].IsObject()) {
     Napi::TypeError::New(env, "'options' must be an object").ThrowAsJavaScriptException();
-    return;
+    return env.Null();
   }
   // ensure second argument is a callback
-  if(!info[1].IsFunction()) {
-    Napi::TypeError::New(env, "'callback' must be a function").ThrowAsJavaScriptException();
-    return;
-  }
-
-  Napi::Function callback = info[1].As<Napi::Function>();
+  // if(!info[1].IsFunction()) {
+  //   Napi::TypeError::New(env, "'callback' must be a function").ThrowAsJavaScriptException();
+  //   return;
+  // }
+  //
+  // Napi::Function callback = info[1].As<Napi::Function>();
   // Callback* callback = new Callback(info[1].As<Napi::Function>());
 
   Napi::Object object = info[0].As<Napi::Object>();
@@ -138,12 +144,15 @@ void Main(const Napi::CallbackInfo& info) {
   if(!fillDataset(env, *dataset, datasetArray)) {
     delete dataset;
     // TODO: call `callback` with the error?
-    return;
+    return env.Null();
   }
-
+  Napi::Promise::Deferred deferred = Napi::Promise::Deferred::New(env);
+  Napi::Function callback = Napi::Function::New(env, EmptyCallback);
   // AsyncQueueWorker(new Urdna2015Worker(urdna2015, dataset, callback));
   // napi_queue_async_work(env, new Urdna2015Worker(urdna2015, dataset, callback));
-  (new Urdna2015Worker(urdna2015, dataset, callback))->Queue();
+  // (new Urdna2015Worker(urdna2015, dataset, callback))->Queue();
+  (new Urdna2015Worker(urdna2015, dataset, deferred, callback))->Queue();
+  return deferred.Promise();
 }
 
 Napi::Value MainSync(const Napi::CallbackInfo& info) {
@@ -184,7 +193,6 @@ Napi::Value MainSync(const Napi::CallbackInfo& info) {
 
   std::string output = urdna2015.main(dataset);
   return Napi::String::New(env, output.c_str());
-  // return New(output.c_str());
 }
 
 static bool fillDataset(Napi::Env env, Dataset& dataset, const Napi::Array& datasetArray) {
@@ -306,6 +314,14 @@ static bool createTerm(
   // term->value = *Utf8String(object->Get(valueKey));
 
   return true;
+}
+
+Napi::Value EmptyCallback(const Napi::CallbackInfo& info)
+{
+    Napi::Env env = info.Env();
+    Napi::HandleScope scope(env);
+
+    return env.Undefined();
 }
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
