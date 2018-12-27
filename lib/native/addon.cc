@@ -7,38 +7,41 @@
  * <https://github.com/digitalbazaar/rdf-canonize/blob/master/LICENSE>
  ********************************************************************/
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 #include "addon.h"   // NOLINT(build/include)
 #include "urdna2015.h"  // NOLINT(build/include)
 
-using Nan::AsyncQueueWorker;
-using Nan::AsyncWorker;
-using Nan::Callback;
-using Nan::GetFunction;
-using Nan::HandleScope;
-using Nan::MaybeLocal;
-using Nan::New;
-using Nan::Null;
-using Nan::Set;
-using Nan::To;
-using Nan::Utf8String;
-using v8::Array;
-using v8::Function;
-using v8::FunctionTemplate;
-using v8::Handle;
-using v8::Isolate;
-using v8::Local;
-using v8::Number;
-using v8::Object;
-using v8::String;
-using v8::Value;
+// using Napi::AsyncQueueWorker;
+using Napi::AsyncWorker;
+using Napi::FunctionReference;
+// using Napi::GetFunction;
+using Napi::HandleScope;
+// using Napi::MaybeLocal;
+// using Napi::New;
+// using Napi::Null;
+// using Napi::Set;
+// using Napi::To;
+using std::string;
+using Napi::Array;
+using Napi::Function;
+using Napi::FunctionReference;
+// using Napi::Handle;
+// using Napi::Isolate;
+using Napi::Number;
+using Napi::Object;
+using Napi::String;
+using Napi::Value;
 
 using namespace RdfCanonize;
 
 class Urdna2015Worker : public AsyncWorker {
 public:
-  Urdna2015Worker(Urdna2015 urdna2015, Dataset* dataset, Callback* callback)
-    : AsyncWorker(callback), urdna2015(urdna2015), dataset(dataset) {}
+  Urdna2015Worker(
+    Urdna2015 urdna2015,
+    Dataset* dataset,
+    const Napi::Function& callback
+  ) : AsyncWorker(callback), urdna2015(urdna2015), dataset(dataset) {}
   ~Urdna2015Worker() {
     delete dataset;
   }
@@ -54,14 +57,24 @@ public:
   // Executed when the async work is complete
   // this function will be run inside the main event loop
   // so it is safe to use V8 again
-  void HandleOKCallback () {
-    HandleScope scope;
-    Local<Value> argv[] = {
-      Null(),
-      New(output.c_str()).ToLocalChecked()
-    };
+  void OnOK () {
+    // HandleScope scope;
+    Napi::Env env = Env();
 
-    callback->Call(2, argv);
+    Callback().MakeCallback(
+      Receiver().Value(),
+      {
+        env.Null(),
+        Napi::String::New(env, output.c_str())
+      }
+    );
+
+    // Napi::Value argv[] = {
+    //   Null(),
+    //   New(output.c_str())
+    // };
+    //
+    // callback->Call(2, argv);
   }
 
 private:
@@ -71,43 +84,48 @@ private:
 };
 
 static bool fillDataset(
-  Dataset& dataset, const Handle<Array>& datasetArray);
+  Dataset& dataset, const Napi::Array& datasetArray);
 static bool createTerm(
   Term*& term,
-  const Handle<Object>& object,
-  const Local<String>& termTypeKey,
-  const Local<String>& valueKey,
-  const Local<String>& datatypeKey,
-  const Local<String>& languageKey);
+  const Napi::Object& object,
+  const Napi::String& termTypeKey,
+  const Napi::String& valueKey,
+  const Napi::String& datatypeKey,
+  const Napi::String& languageKey);
 
-NAN_METHOD(Main) {
+Napi::Value Main(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   // ensure first argument is an object
-  if(!info[0]->IsObject()) {
-    Nan::ThrowTypeError("'options' must be an object");
-    return;
+  if(!info[0].IsObject()) {
+    Napi::TypeError::New(env, "'options' must be an object").ThrowAsJavaScriptException();
+    return env.Null();
   }
   // ensure second argument is a callback
-  if(!info[1]->IsFunction()) {
-    Nan::ThrowTypeError("'callback' must be a function");
-    return;
+  if(!info[1].IsFunction()) {
+    Napi::TypeError::New(env, "'callback' must be a function").ThrowAsJavaScriptException();
+    return env.Null();
   }
 
-  Callback* callback = new Callback(info[1].As<Function>());
-  Handle<Object> object = Handle<Object>::Cast(info[0]);
+  Napi::Function callback = info[1].As<Napi::Function>();
+  // Callback* callback = new Callback(info[1].As<Napi::Function>());
+
+  Napi::Object object = info[0].As<Napi::Object>();
+  Napi::Array datasetArray = object.Get("dataset").As<Napi::Array>();
+  // Handle<Object> object = info[0].As<Handle<Object>>();
   /*
   Handle<Value> maxCallStackDepthValue =
-    object->Get(New("maxCallStackDepth").ToLocalChecked());
+    object->Get(New("maxCallStackDepth"));
   Handle<Value> maxTotalCallStackDepthValue =
-    object->Get(New("maxTotalCallStackDepth").ToLocalChecked());
+    object->Get(New("maxTotalCallStackDepth"));
   */
-  Handle<Array> datasetArray =
-    Handle<Array>::Cast(object->Get(New("dataset").ToLocalChecked()));
+  // Napi::Array datasetArray =
+  //   object.Get("dataset")->Get(New("dataset".As<Napi::Array>()));
 
   /*
   const unsigned maxCallStackDepth =
-    To<unsigned>(maxCallStackDepthValue).FromJust();
+    To<unsigned>(maxCallStackDepthValue);
   const unsigned maxTotalCallStackDepth =
-    To<unsigned>(maxTotalCallStackDepthValue).FromJust();
+    To<unsigned>(maxTotalCallStackDepthValue);
   */
 
   //Urdna2015 urdna2015(maxCallStackDepth, maxTotalCallStackDepth);
@@ -117,34 +135,40 @@ NAN_METHOD(Main) {
   if(!fillDataset(*dataset, datasetArray)) {
     delete dataset;
     // TODO: call `callback` with the error?
-    return;
+    return env.Null();
   }
 
-  AsyncQueueWorker(new Urdna2015Worker(urdna2015, dataset, callback));
+  // AsyncQueueWorker(new Urdna2015Worker(urdna2015, dataset, callback));
+  // napi_queue_async_work(env, new Urdna2015Worker(urdna2015, dataset, callback));
+  (new Urdna2015Worker(urdna2015, dataset, callback))->Queue();
 }
 
-NAN_METHOD(MainSync) {
+Napi::Value MainSync(const Napi::CallbackInfo& info) {
+  Napi::Env env = info.Env();
   // ensure first argument is an object
-  if(!info[0]->IsObject()) {
-    Nan::ThrowTypeError("'options' must be an object");
-    return;
+  if(!info[0].IsObject()) {
+    Napi::TypeError::New(env, "'options' must be an object").ThrowAsJavaScriptException();
+    return env.Null();
   }
 
-  Handle<Object> object = Handle<Object>::Cast(info[0]);
+  Napi::Object object = info[0].As<Napi::Object>();
+  Napi::Array datasetArray = object.Get("dataset").As<Napi::Array>();
+
+  // Handle<Object> object = info[0].As<Handle<Object>>();
   /*
   Handle<Value> maxCallStackDepthValue =
-    object->Get(New("maxCallStackDepth").ToLocalChecked());
+    object->Get(New("maxCallStackDepth"));
   Handle<Value> maxTotalCallStackDepthValue =
-    object->Get(New("maxTotalCallStackDepth").ToLocalChecked());
+    object->Get(New("maxTotalCallStackDepth"));
   */
-  Handle<Array> datasetArray =
-    Handle<Array>::Cast(object->Get(New("dataset").ToLocalChecked()));
+    // Handle<Array> datasetArray =
+    //   object->Get(New("dataset".As<Handle<Array>>()));
 
   /*
   const unsigned maxCallStackDepth =
-    To<unsigned>(maxCallStackDepthValue).FromJust();
+    To<unsigned>(maxCallStackDepthValue);
   const unsigned maxTotalCallStackDepth =
-    To<unsigned>(maxTotalCallStackDepthValue).FromJust();
+    To<unsigned>(maxTotalCallStackDepthValue);
   */
 
   //Urdna2015 urdna2015(maxCallStackDepth, maxTotalCallStackDepth);
@@ -152,38 +176,38 @@ NAN_METHOD(MainSync) {
 
   Dataset dataset;
   if(!fillDataset(dataset, datasetArray)) {
-    return;
+    return env.Null();
   }
 
   std::string output = urdna2015.main(dataset);
-  info.GetReturnValue().Set(New(output.c_str()).ToLocalChecked());
+  return New(output.c_str());
 }
 
 static bool fillDataset(Dataset& dataset, const Handle<Array>& datasetArray) {
-  Local<String> subjectKey = New("subject").ToLocalChecked();
-  Local<String> predicateKey = New("predicate").ToLocalChecked();
-  Local<String> objectKey = New("object").ToLocalChecked();
-  Local<String> graphKey = New("graph").ToLocalChecked();
+  Napi::String subjectKey = New("subject");
+  Napi::String predicateKey = New("predicate");
+  Napi::String objectKey = New("object");
+  Napi::String graphKey = New("graph");
 
-  Local<String> termTypeKey = New("termType").ToLocalChecked();
-  Local<String> valueKey = New("value").ToLocalChecked();
-  Local<String> datatypeKey = New("datatype").ToLocalChecked();
-  Local<String> languageKey = New("language").ToLocalChecked();
+  Napi::String termTypeKey = New("termType");
+  Napi::String valueKey = New("value");
+  Napi::String datatypeKey = New("datatype");
+  Napi::String languageKey = New("language");
 
   // TODO: check for valid structure
   for(size_t di = 0; di < datasetArray->Length(); ++di) {
-    Handle<Object> quad = Handle<Object>::Cast(datasetArray->Get(di));
+    Handle<Object> quad = datasetArray->Get(di.As<Handle<Object>>());
 
     // TODO: ensure all keys are present and represent objects
 
     Handle<Object> subject =
-      Handle<Object>::Cast(quad->Get(subjectKey));
+      quad->Get(subjectKey.As<Handle<Object>>());
     Handle<Object> predicate =
-      Handle<Object>::Cast(quad->Get(predicateKey));
+      quad->Get(predicateKey.As<Handle<Object>>());
     Handle<Object> object =
-      Handle<Object>::Cast(quad->Get(objectKey));
+      quad->Get(objectKey.As<Handle<Object>>());
     Handle<Object> graph =
-      Handle<Object>::Cast(quad->Get(graphKey));
+      quad->Get(graphKey.As<Handle<Object>>());
 
     Quad* q = new Quad();
 
@@ -215,12 +239,12 @@ static bool fillDataset(Dataset& dataset, const Handle<Array>& datasetArray) {
 static bool createTerm(
   Term*& term,
   const Handle<Object>& object,
-  const Local<String>& termTypeKey,
-  const Local<String>& valueKey,
-  const Local<String>& datatypeKey,
-  const Local<String>& languageKey) {
-  if(!(object->Has(termTypeKey) && object->Get(termTypeKey)->IsString())) {
-    Nan::ThrowTypeError(
+  const Napi::String& termTypeKey,
+  const Napi::String& valueKey,
+  const Napi::String& datatypeKey,
+  const Napi::String& languageKey) {
+  if(!(object->Has(termTypeKey) && object->Get(termTypeKey).IsString())) {
+    Napi::ThrowTypeError(
       "'termType' must be 'BlankNode', 'NamedNode', " \
       "'Literal', or 'DefaultGraph'.");
     return false;
@@ -237,9 +261,9 @@ static bool createTerm(
     term = literal;
     if(object->Has(datatypeKey)) {
       Handle<Object> datatype =
-        Handle<Object>::Cast(object->Get(datatypeKey));
-      if(!datatype->IsObject() || datatype->IsNull()) {
-        Nan::ThrowError(
+        object->Get(datatypeKey.As<Handle<Object>>());
+      if(!datatype.IsObject() || datatype->IsNull()) {
+        Napi::ThrowError(
           "'termType' must be 'BlankNode', 'NamedNode', " \
           "'Literal', or 'DefaultGraph'.");
         return false;
@@ -251,7 +275,8 @@ static bool createTerm(
         return false;
       }
       if(dataTypeTerm->termType != TermType::NAMED_NODE) {
-        Nan::ThrowError("datatype 'termType' must be 'NamedNode'.");
+        Napi::Error::New(env, "datatype 'termType' must be 'NamedNode'.").ThrowAsJavaScriptException();
+
         delete dataTypeTerm;
         return false;
       }
@@ -263,7 +288,7 @@ static bool createTerm(
   } else if(strcmp(*termType, "DefaultGraph") == 0) {
     term = new DefaultGraph();
   } else {
-    Nan::ThrowError(
+    Napi::ThrowError(
       "'termType' must be 'BlankNode', 'NamedNode', " \
       "'Literal', or 'DefaultGraph'.");
     return false;
@@ -274,13 +299,13 @@ static bool createTerm(
   return true;
 }
 
-NAN_MODULE_INIT(InitAll) {
+Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
   Set(
-    target, New<String>("main").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(Main)).ToLocalChecked());
+    target, New<String>("main"),
+    GetFunction(New<Napi::FunctionReference>(Main)));
   Set(
-    target, New<String>("mainSync").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(MainSync)).ToLocalChecked());
+    target, New<String>("mainSync"),
+    GetFunction(New<Napi::FunctionReference>(MainSync)));
 }
 
-NODE_MODULE(addon, InitAll)
+NODE_API_MODULE(addon, InitAll)

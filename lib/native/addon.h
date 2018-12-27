@@ -10,8 +10,9 @@
 #ifndef RDF_CANONIZE_URDNA2015_ADDON_H_
 #define RDF_CANONIZE_URDNA2015_ADDON_H_
 
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 
-NAN_METHOD(Main);
+Napi::Value Main(const Napi::CallbackInfo& info);
 
 #endif // RDF_CANONIZE_URDNA2015_ADDON_H_
