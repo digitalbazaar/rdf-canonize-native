@@ -23,8 +23,6 @@
       "conditions": [
         ['node_shared_openssl=="false"', {
           "include_dirs": [
-            "<!@(node -p \"require('node-addon-api').include\")",
-            "<!@(node -p \"require('node-addon-api').include\")",
             "<(node_root_dir)/include/node/openssl"
           ]
         }]
