@@ -84,8 +84,11 @@ private:
 };
 
 static bool fillDataset(
-  Dataset& dataset, const Napi::Array& datasetArray);
+  Napi::Env env,
+  Dataset& dataset,
+  const Napi::Array& datasetArray);
 static bool createTerm(
+  Napi::Env env,
   Term*& term,
   const Napi::Object& object,
   const Napi::String& termTypeKey,
@@ -93,17 +96,17 @@ static bool createTerm(
   const Napi::String& datatypeKey,
   const Napi::String& languageKey);
 
-Napi::Value Main(const Napi::CallbackInfo& info) {
+void Main(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   // ensure first argument is an object
   if(!info[0].IsObject()) {
     Napi::TypeError::New(env, "'options' must be an object").ThrowAsJavaScriptException();
-    return env.Null();
+    return;
   }
   // ensure second argument is a callback
   if(!info[1].IsFunction()) {
     Napi::TypeError::New(env, "'callback' must be a function").ThrowAsJavaScriptException();
-    return env.Null();
+    return;
   }
 
   Napi::Function callback = info[1].As<Napi::Function>();
@@ -132,10 +135,10 @@ Napi::Value Main(const Napi::CallbackInfo& info) {
   Urdna2015 urdna2015(0, 0);
 
   Dataset* dataset = new Dataset();
-  if(!fillDataset(*dataset, datasetArray)) {
+  if(!fillDataset(env, *dataset, datasetArray)) {
     delete dataset;
     // TODO: call `callback` with the error?
-    return env.Null();
+    return;
   }
 
   // AsyncQueueWorker(new Urdna2015Worker(urdna2015, dataset, callback));
@@ -175,53 +178,54 @@ Napi::Value MainSync(const Napi::CallbackInfo& info) {
   Urdna2015 urdna2015(0, 0);
 
   Dataset dataset;
-  if(!fillDataset(dataset, datasetArray)) {
+  if(!fillDataset(env, dataset, datasetArray)) {
     return env.Null();
   }
 
   std::string output = urdna2015.main(dataset);
-  return New(output.c_str());
+  return Napi::String::New(env, output.c_str());
+  // return New(output.c_str());
 }
 
-static bool fillDataset(Dataset& dataset, const Handle<Array>& datasetArray) {
-  Napi::String subjectKey = New("subject");
-  Napi::String predicateKey = New("predicate");
-  Napi::String objectKey = New("object");
-  Napi::String graphKey = New("graph");
+static bool fillDataset(Napi::Env env, Dataset& dataset, const Napi::Array& datasetArray) {
+  // Napi::String subjectKey = Napi::String::New(env, "subject");
+  // Napi::String predicateKey = Napi::String::New(env, "predicate");
+  // Napi::String objectKey = Napi::String::New(env, "object");
+  // Napi::String graphKey = Napi::String::New(env, "graph");
 
-  Napi::String termTypeKey = New("termType");
-  Napi::String valueKey = New("value");
-  Napi::String datatypeKey = New("datatype");
-  Napi::String languageKey = New("language");
+  Napi::String termTypeKey = Napi::String::New(env, "termType");
+  Napi::String valueKey = Napi::String::New(env, "value");
+  Napi::String datatypeKey = Napi::String::New(env, "datatype");
+  Napi::String languageKey = Napi::String::New(env, "language");
 
   // TODO: check for valid structure
-  for(size_t di = 0; di < datasetArray->Length(); ++di) {
-    Handle<Object> quad = datasetArray->Get(di.As<Handle<Object>>());
+  for(size_t di = 0; di < datasetArray.Length(); ++di) {
+    Napi::Object quad = datasetArray.Get(di).As<Napi::Object>();
 
     // TODO: ensure all keys are present and represent objects
 
-    Handle<Object> subject =
-      quad->Get(subjectKey.As<Handle<Object>>());
-    Handle<Object> predicate =
-      quad->Get(predicateKey.As<Handle<Object>>());
-    Handle<Object> object =
-      quad->Get(objectKey.As<Handle<Object>>());
-    Handle<Object> graph =
-      quad->Get(graphKey.As<Handle<Object>>());
+    Napi::Object subject = quad.Get("subject").As<Napi::Object>();
+    Napi::Object predicate = quad.Get("predicate").As<Napi::Object>();
+    Napi::Object object = quad.Get("object").As<Napi::Object>();
+    Napi::Object graph = quad.Get("graph").As<Napi::Object>();
 
     Quad* q = new Quad();
 
     if(!(
       createTerm(
+        env,
         q->subject, subject,
         termTypeKey, valueKey, datatypeKey, languageKey) &&
       createTerm(
+        env,
         q->predicate, predicate,
         termTypeKey, valueKey, datatypeKey, languageKey) &&
       createTerm(
+        env,
         q->object, object,
         termTypeKey, valueKey, datatypeKey, languageKey) &&
       createTerm(
+        env,
         q->graph, graph,
         termTypeKey, valueKey, datatypeKey, languageKey))) {
       delete q;
@@ -237,75 +241,83 @@ static bool fillDataset(Dataset& dataset, const Handle<Array>& datasetArray) {
 }
 
 static bool createTerm(
+  Napi::Env env,
   Term*& term,
-  const Handle<Object>& object,
+  const Napi::Object& object,
   const Napi::String& termTypeKey,
   const Napi::String& valueKey,
   const Napi::String& datatypeKey,
   const Napi::String& languageKey) {
-  if(!(object->Has(termTypeKey) && object->Get(termTypeKey).IsString())) {
-    Napi::ThrowTypeError(
-      "'termType' must be 'BlankNode', 'NamedNode', " \
+  if(!(object.Has(termTypeKey) && object.Get(termTypeKey).IsString())) {
+    throw Napi::TypeError::New(
+      env, "'termType' must be 'BlankNode', 'NamedNode', " \
       "'Literal', or 'DefaultGraph'.");
     return false;
   }
 
-  Utf8String termType(object->Get(termTypeKey));
+  string termType = object.Get(termTypeKey).As<Napi::String>().Utf8Value();
 
-  if(strcmp(*termType, "BlankNode") == 0) {
+  if(termType.compare("BlankNode") == 0) {
     term = new BlankNode();
-  } else if(strcmp(*termType, "NamedNode") == 0) {
+  } else if(termType.compare("NamedNode") == 0) {
     term = new NamedNode();
-  } else if(strcmp(*termType, "Literal") == 0) {
+  } else if(termType.compare("Literal") == 0) {
     Literal* literal = new Literal();
     term = literal;
-    if(object->Has(datatypeKey)) {
-      Handle<Object> datatype =
-        object->Get(datatypeKey.As<Handle<Object>>());
-      if(!datatype.IsObject() || datatype->IsNull()) {
-        Napi::ThrowError(
-          "'termType' must be 'BlankNode', 'NamedNode', " \
+    if(object.Has(datatypeKey)) {
+      Napi::Object datatype = object.Get(datatypeKey).As<Napi::Object>();
+      if(!datatype.IsObject() || datatype.IsNull()) {
+        throw Napi::TypeError::New(
+          env, "'termType' must be 'BlankNode', 'NamedNode', " \
           "'Literal', or 'DefaultGraph'.");
         return false;
       }
       Term* dataTypeTerm;
       if(!createTerm(
+        env,
         dataTypeTerm, datatype,
         termTypeKey, valueKey, datatypeKey, languageKey)) {
         return false;
       }
       if(dataTypeTerm->termType != TermType::NAMED_NODE) {
-        Napi::Error::New(env, "datatype 'termType' must be 'NamedNode'.").ThrowAsJavaScriptException();
+        throw Napi::TypeError::New(
+          env, "datatype 'termType' must be 'NamedNode'.");
+        // Napi::Error::New(env, "datatype 'termType' must be 'NamedNode'.").ThrowAsJavaScriptException();
 
         delete dataTypeTerm;
         return false;
       }
       literal->datatype = (NamedNode*)dataTypeTerm;
     }
-    if(object->Has(languageKey)) {
-      literal->language = *Utf8String(object->Get(languageKey));
+    if(object.Has(languageKey)) {
+      literal->language = object.Get(languageKey).As<Napi::String>().Utf8Value();
+      // literal->language = *Utf8String(objectGet(languageKey));
     }
-  } else if(strcmp(*termType, "DefaultGraph") == 0) {
+  } else if(termType.compare("DefaultGraph") == 0) {
     term = new DefaultGraph();
   } else {
-    Napi::ThrowError(
-      "'termType' must be 'BlankNode', 'NamedNode', " \
+    throw Napi::TypeError::New(
+      env, "'termType' must be 'BlankNode', 'NamedNode', " \
       "'Literal', or 'DefaultGraph'.");
     return false;
   }
 
-  term->value = *Utf8String(object->Get(valueKey));
+  term->value = object.Get(valueKey).As<Napi::String>().Utf8Value();
+  // term->value = *Utf8String(object->Get(valueKey));
 
   return true;
 }
 
-Napi::Object InitAll(Napi::Env env, Napi::Object exports) {
-  Set(
-    target, New<String>("main"),
-    GetFunction(New<Napi::FunctionReference>(Main)));
-  Set(
-    target, New<String>("mainSync"),
-    GetFunction(New<Napi::FunctionReference>(MainSync)));
+Napi::Object Init(Napi::Env env, Napi::Object exports) {
+  exports.Set(
+    Napi::String::New(env, "main"),
+    Napi::Function::New(env, Main)
+  );
+  exports.Set(
+    Napi::String::New(env, "mainSync"),
+    Napi::Function::New(env, MainSync)
+  );
+  return exports;
 }
 
-NODE_API_MODULE(addon, InitAll)
+NODE_API_MODULE(addon, Init)

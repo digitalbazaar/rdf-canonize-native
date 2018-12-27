@@ -13,6 +13,6 @@
 #include <napi.h>
 #include <uv.h>
 
-Napi::Value Main(const Napi::CallbackInfo& info);
+void Main(const Napi::CallbackInfo& info);
 
 #endif // RDF_CANONIZE_URDNA2015_ADDON_H_
