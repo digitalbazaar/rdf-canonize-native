@@ -35,6 +35,11 @@ using v8::Value;
 
 using namespace RdfCanonize;
 
+const double BLANK_NODE_LABEL = 0;
+const double DEFAULT_GRAPH_LABEL = 1;
+const double NAMED_NODE_LABEL = 2;
+const double LITERAL_LABEL = 3;
+
 class Urdna2015Worker : public AsyncWorker {
 public:
   Urdna2015Worker(Urdna2015 urdna2015, Dataset* dataset, Callback* callback)
@@ -219,20 +224,20 @@ static bool createTerm(
   const Local<String>& valueKey,
   const Local<String>& datatypeKey,
   const Local<String>& languageKey) {
-  if(!(object->Has(termTypeKey) && object->Get(termTypeKey)->IsString())) {
+  if(!(object->Has(termTypeKey) && object->Get(termTypeKey)->IsNumber())) {
     Nan::ThrowTypeError(
       "'termType' must be 'BlankNode', 'NamedNode', " \
       "'Literal', or 'DefaultGraph'.");
     return false;
   }
 
-  Utf8String termType(object->Get(termTypeKey));
+  double termType(object->Get(termTypeKey)->NumberValue());
 
-  if(strcmp(*termType, "BlankNode") == 0) {
+  if(termType == BLANK_NODE_LABEL) {
     term = new BlankNode();
-  } else if(strcmp(*termType, "NamedNode") == 0) {
+  } else if(termType == NAMED_NODE_LABEL) {
     term = new NamedNode();
-  } else if(strcmp(*termType, "Literal") == 0) {
+  } else if(termType == LITERAL_LABEL) {
     Literal* literal = new Literal();
     term = literal;
     if(object->Has(datatypeKey)) {
@@ -260,7 +265,7 @@ static bool createTerm(
     if(object->Has(languageKey)) {
       literal->language = *Utf8String(object->Get(languageKey));
     }
-  } else if(strcmp(*termType, "DefaultGraph") == 0) {
+  } else if(termType == DEFAULT_GRAPH_LABEL) {
     term = new DefaultGraph();
   } else {
     Nan::ThrowError(
