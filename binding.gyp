@@ -11,8 +11,8 @@
         "lib/native/addon.cc",
         "lib/native/urdna2015.cc"
       ],
-      "include_dirs": ["<!@(node -p \"require('node-addon-api').include\")"
-        ],
+      "include_dirs": ["<!@(node -p \"require('node-addon-api').include\")"],
+      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
       "cflags": [
         "-Wno-maybe-uninitialized",
         "-std=c++11"
