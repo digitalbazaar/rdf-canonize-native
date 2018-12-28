@@ -110,7 +110,7 @@ Napi::Value EmptyCallback(const Napi::CallbackInfo& info);
 Napi::Value Main(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   // ensure first argument is an object
-  if(!info[0].IsObject()) {
+  if(!info[0].IsArray()) {
     Napi::TypeError::New(env, "'options' must be an object").ThrowAsJavaScriptException();
     return env.Null();
   }
@@ -123,8 +123,10 @@ Napi::Value Main(const Napi::CallbackInfo& info) {
   // Napi::Function callback = info[1].As<Napi::Function>();
   // Callback* callback = new Callback(info[1].As<Napi::Function>());
 
-  Napi::Object object = info[0].As<Napi::Object>();
-  Napi::Array datasetArray = object.Get("dataset").As<Napi::Array>();
+  // Napi::Object object = info[0].As<Napi::Object>();
+  // Napi::Object object = info[0].As<Napi::Object>();
+  // Napi::Array datasetArray = object.Get("dataset").As<Napi::Array>();
+  Napi::Array datasetArray = info[0].As<Napi::Array>();
   // Handle<Object> object = info[0].As<Handle<Object>>();
   /*
   Handle<Value> maxCallStackDepthValue =
@@ -163,15 +165,17 @@ Napi::Value Main(const Napi::CallbackInfo& info) {
 Napi::Value MainSync(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
   // ensure first argument is an object
-  if(!info[0].IsObject()) {
+  if(!info[0].IsArray()) {
     Napi::TypeError::New(env, "'options' must be an object").ThrowAsJavaScriptException();
     return env.Null();
   }
 
-  const Napi::String dataSetKey = Napi::String::New(env, "dataset");
+  // const Napi::String dataSetKey = Napi::String::New(env, "dataset");
+  //
+  // Napi::Object object = info[0].As<Napi::Object>();
+  // Napi::Array datasetArray = object.Get(dataSetKey).As<Napi::Array>();
 
-  Napi::Object object = info[0].As<Napi::Object>();
-  Napi::Array datasetArray = object.Get(dataSetKey).As<Napi::Array>();
+  Napi::Array datasetArray = info[0].As<Napi::Array>();
 
   // Handle<Object> object = info[0].As<Handle<Object>>();
   /*
