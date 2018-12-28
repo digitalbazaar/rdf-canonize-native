@@ -294,6 +294,8 @@ static bool createTerm(
     if(object.Has(dataTypeKey)) {
       // FIXME: this code is probably never executed? Since we're casting it
       // as an object and only later testing to see if it's an object?
+      // I just read that the Get API fails if the target is not the appropriate
+      // type.
       Napi::Object datatype = object.Get(dataTypeKey).As<Napi::Object>();
       if(!datatype.IsObject() || datatype.IsNull()) {
         throw Napi::TypeError::New(
