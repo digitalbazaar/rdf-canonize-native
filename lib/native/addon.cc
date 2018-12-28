@@ -95,11 +95,7 @@ static bool fillDataset(
 static bool createTerm(
   Napi::Env env,
   Term*& term,
-  const Napi::Object& object,
-  const Napi::String& termTypeKey,
-  const Napi::String& valueKey,
-  const Napi::String& datatypeKey,
-  const Napi::String& languageKey);
+  const Napi::Object& object);
 Napi::Value EmptyCallback(const Napi::CallbackInfo& info);
 
 Napi::Value Main(const Napi::CallbackInfo& info) {
@@ -196,16 +192,6 @@ Napi::Value MainSync(const Napi::CallbackInfo& info) {
 }
 
 static bool fillDataset(Napi::Env env, Dataset& dataset, const Napi::Array& datasetArray) {
-  // Napi::String subjectKey = Napi::String::New(env, "subject");
-  // Napi::String predicateKey = Napi::String::New(env, "predicate");
-  // Napi::String objectKey = Napi::String::New(env, "object");
-  // Napi::String graphKey = Napi::String::New(env, "graph");
-
-  Napi::String termTypeKey = Napi::String::New(env, "termType");
-  Napi::String valueKey = Napi::String::New(env, "value");
-  Napi::String datatypeKey = Napi::String::New(env, "datatype");
-  Napi::String languageKey = Napi::String::New(env, "language");
-
   // TODO: check for valid structure
   for(size_t di = 0; di < datasetArray.Length(); ++di) {
     Napi::Object quad = datasetArray.Get(di).As<Napi::Object>();
@@ -220,22 +206,10 @@ static bool fillDataset(Napi::Env env, Dataset& dataset, const Napi::Array& data
     Quad* q = new Quad();
 
     if(!(
-      createTerm(
-        env,
-        q->subject, subject,
-        termTypeKey, valueKey, datatypeKey, languageKey) &&
-      createTerm(
-        env,
-        q->predicate, predicate,
-        termTypeKey, valueKey, datatypeKey, languageKey) &&
-      createTerm(
-        env,
-        q->object, object,
-        termTypeKey, valueKey, datatypeKey, languageKey) &&
-      createTerm(
-        env,
-        q->graph, graph,
-        termTypeKey, valueKey, datatypeKey, languageKey))) {
+      createTerm(env, q->subject, subject) &&
+      createTerm(env, q->predicate, predicate) &&
+      createTerm(env, q->object, object) &&
+      createTerm(env, q->graph, graph))) {
       delete q;
       return false;
     }
@@ -248,22 +222,15 @@ static bool fillDataset(Napi::Env env, Dataset& dataset, const Napi::Array& data
   return true;
 }
 
-static bool createTerm(
-  Napi::Env env,
-  Term*& term,
-  const Napi::Object& object,
-  const Napi::String& termTypeKey,
-  const Napi::String& valueKey,
-  const Napi::String& datatypeKey,
-  const Napi::String& languageKey) {
-  if(!(object.Has(termTypeKey) && object.Get(termTypeKey).IsString())) {
+static bool createTerm(Napi::Env env, Term*& term, const Napi::Object& object) {
+  if(!(object.Has("termType") && object.Get("termType").IsString())) {
     throw Napi::TypeError::New(
       env, "'termType' must be 'BlankNode', 'NamedNode', " \
       "'Literal', or 'DefaultGraph'.");
     return false;
   }
 
-  string termType = object.Get(termTypeKey).As<Napi::String>().Utf8Value();
+  string termType = object.Get("termType").As<Napi::String>().Utf8Value();
 
   if(termType.compare("BlankNode") == 0) {
     term = new BlankNode();
@@ -272,8 +239,11 @@ static bool createTerm(
   } else if(termType.compare("Literal") == 0) {
     Literal* literal = new Literal();
     term = literal;
-    if(object.Has(datatypeKey)) {
-      Napi::Object datatype = object.Get(datatypeKey).As<Napi::Object>();
+    // FIXME: is the casing here correct?
+    if(object.Has("datatype")) {
+      // FIXME: this code is probably never executed? Since we're casting it
+      // as an object and only later testing to see if it's an object?
+      Napi::Object datatype = object.Get("datatype").As<Napi::Object>();
       if(!datatype.IsObject() || datatype.IsNull()) {
         throw Napi::TypeError::New(
           env, "'termType' must be 'BlankNode', 'NamedNode', " \
@@ -281,10 +251,7 @@ static bool createTerm(
         return false;
       }
       Term* dataTypeTerm;
-      if(!createTerm(
-        env,
-        dataTypeTerm, datatype,
-        termTypeKey, valueKey, datatypeKey, languageKey)) {
+      if(!createTerm(env, dataTypeTerm, datatype)) {
         return false;
       }
       if(dataTypeTerm->termType != TermType::NAMED_NODE) {
@@ -297,9 +264,8 @@ static bool createTerm(
       }
       literal->datatype = (NamedNode*)dataTypeTerm;
     }
-    if(object.Has(languageKey)) {
-      literal->language = object.Get(languageKey).As<Napi::String>().Utf8Value();
-      // literal->language = *Utf8String(objectGet(languageKey));
+    if(object.Has("language")) {
+      literal->language = object.Get("language").As<Napi::String>().Utf8Value();
     }
   } else if(termType.compare("DefaultGraph") == 0) {
     term = new DefaultGraph();
@@ -310,8 +276,7 @@ static bool createTerm(
     return false;
   }
 
-  term->value = object.Get(valueKey).As<Napi::String>().Utf8Value();
-  // term->value = *Utf8String(object->Get(valueKey));
+  term->value = object.Get("value").As<Napi::String>().Utf8Value();
 
   return true;
 }
