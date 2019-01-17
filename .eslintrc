@@ -1,8 +1,7 @@
 {
   "env": {
     "browser": true,
-    "mocha": true,
-    "phantomjs": true
+    "mocha": true
   },
   "rules": {
     "indent": ["error", 2, {"outerIIFEBody": 0}]
