@@ -1,5 +1,9 @@
 # rdf-canonize-native ChangeLog
 
+### Removed
+- **BREAKING**: Remove Node.js 6.x support.  Node.js 6.x users should use 0.3.x
+  or transform the code on your own.
+
 ## 0.3.0 - 2018-11-01
 
 ### Notes
