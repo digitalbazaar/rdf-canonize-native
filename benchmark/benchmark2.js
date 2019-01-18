@@ -5,13 +5,14 @@
 
 const canonize = require('..');
 const fs = require('fs');
-const jsonld = require('jsonld');
+const join = require('path').join;
+const jsonld = require('../../jsonld.js');
 const uuid = require('uuid/v4');
 const Benchmark = require('benchmark');
 
 const suite = new Benchmark.Suite();
 
-const sampleData = fs.readFileSync('./test-recipe.jsonld');
+const sampleData = fs.readFileSync(join(__dirname, 'test-recipe.jsonld'));
 
 const documents = [];
 const nquads = [];
