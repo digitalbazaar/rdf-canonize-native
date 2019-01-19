@@ -10,40 +10,39 @@
 #include "NQuads.h"
 #include <algorithm>
 #include <iterator>
-#include <regex>
-#include <sstream>
+#include <string>
 #include <vector>
-
-#include <iostream>
 
 using namespace std;
 using namespace RdfCanonize;
 
-string unescape(std::string const& s);
+static string escape(std::string const& s);
 
 static string RDF_LANGSTRING =
   "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 static string XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
-static regex REGEX_BACK_SLASH("\\\\");
-static regex REGEX_TAB("\\\t");
-static regex REGEX_LF("\\\n");
-static regex REGEX_CR("\\\r");
-static regex REGEX_QUOTE("\\\"");
 
 string NQuads::serialize(const QuadSet& quadset) {
   // serialize each quad
   vector<string> nquads;
+  // track size to allocate output string
+  size_t size = 0;
   for(const Quad* q : quadset) {
-    nquads.push_back(NQuads::serializeQuad(*q));
+    const string nquad = NQuads::serializeQuad(*q);
+    nquads.push_back(nquad);
+    size += nquad.size();
   }
 
   // sort and join nquads
   sort(nquads.begin(), nquads.end());
-  ostringstream joined;
-  copy(
-    nquads.begin(), nquads.end(),
-    ostream_iterator<string>(joined, ""));
-  return joined.str();
+  string joined;
+  joined.reserve(size);
+  for(vector<string>::const_iterator i = nquads.begin();
+    i != nquads.end();
+    ++i) {
+    joined += *i;
+  }
+  return joined;
 }
 
 string NQuads::serializeQuad(const Quad& quad) {
@@ -52,13 +51,13 @@ string NQuads::serializeQuad(const Quad& quad) {
   Term* o = quad.object;
   Term* g = quad.graph;
 
-  // ostringstream nquad;
   string nquad;
+  // TODO: optimization: estimate and reserve output size
+  //nquad.reserve(...);
 
   // subject and predicate can only be named or blank nodes, not literals
   for(Term* t : {s, p}) {
     if(t->termType == TermType::NAMED_NODE) {
-      // nquad << "<" << t->value << ">";
       nquad += "<" + t->value + ">";
     } else {
       nquad += t->value;
@@ -73,19 +72,7 @@ string NQuads::serializeQuad(const Quad& quad) {
     nquad += o->value;
   } else {
     Literal* literal = (Literal*)o;
-    // TODO: optimize
-    // string escaped = o->value;
-    // escaped = regex_replace(escaped, REGEX_BACK_SLASH, "\\\\");
-    // escaped = regex_replace(escaped, REGEX_TAB, "\\t");
-    // escaped = regex_replace(escaped, REGEX_LF, "\\n");
-    // escaped = regex_replace(escaped, REGEX_CR, "\\r");
-    // escaped = regex_replace(escaped, REGEX_QUOTE, "\\\"");
-
-    // string escaped = o->value;
-    // string escaped = unescape(o->value);
-
-    // cout << escaped;
-    nquad += "\"" + unescape(o->value) + "\"";
+    nquad += "\"" + escape(o->value) + "\"";
     if(literal->datatype != NULL) {
       if(literal->datatype->value == RDF_LANGSTRING) {
         if(literal->language.size() != 0) {
@@ -109,27 +96,22 @@ string NQuads::serializeQuad(const Quad& quad) {
   return nquad;
 }
 
-string unescape(std::string const& s) {
+// TODO: optimize
+string escape(std::string const& s) {
   string res;
-  string::const_iterator it = s.begin();
-  while (it != s.end())
-  {
-    char c = *it++;
-    if (c == '\\' && it != s.end())
-    {
-      switch (*it++) {
-        case '\\': c = '\\'; break;
-        case 'n': c = '\n'; break;
-        case 'r': c = '\r'; break;
-        case 't': c = '\t'; break;
-        // all other escapes
-        default:
-        // invalid escape sequence - skip it. alternatively you can copy it
-        // as is, throw an exception...
-        continue;
-      }
+  // start with original size
+  res.reserve(s.size());
+
+  for(string::const_iterator it = s.begin(); it != s.end(); ++it) {
+    char c = *it;
+    switch (c) {
+      case '"': res += "\\\""; break;
+      case '\\': res += "\\\\"; break;
+      case '\n': res += "\\n"; break;
+      case '\r': res += "\\r"; break;
+      // all other chars
+      default: res += c;
     }
-    res += c;
   }
 
   return res;

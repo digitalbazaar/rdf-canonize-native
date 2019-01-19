@@ -1,5 +1,19 @@
 # rdf-canonize-native ChangeLog
 
+### Fixed
+- **BREAKING**: N-Quad canonical serialized output.
+  - Only escape 4 chars.
+
+### Changed
+- N-Quad native serialization optimization.
+  - Varies based on input by rougly ~1-5x.
+- Native regex and stream use removed.
+  - Simpler code more appropriate for these algorithms.
+- **BREAKING**: Sync js parsing and serialization code from rdf-canonize.
+  - Updates canonical serialized form.
+  - Improves parsing.
+  - Optimized by roughly ~1-2x.
+
 ### Removed
 - **BREAKING**: Remove Node.js 6.x support.  Node.js 6.x users should use 0.3.x
   or transform the code on your own.
