@@ -6,7 +6,7 @@
 
 ### Changed
 - N-Quad native serialization optimization.
-  - Varies based on input by rougly ~1-5x.
+  - Varies based on input by roughly ~1-5x.
 - Native regex and stream use removed.
   - Simpler code more appropriate for these algorithms.
 - **BREAKING**: Sync js parsing and serialization code from rdf-canonize.
