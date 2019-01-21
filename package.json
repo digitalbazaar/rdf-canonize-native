@@ -24,8 +24,6 @@
   "main": "lib/index.js",
   "files": [
     "binding.gyp",
-    "dist/*.js",
-    "dist/*.js.map",
     "lib/*.js",
     "lib/native/*.cc",
     "lib/native/*.h"
