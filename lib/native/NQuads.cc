@@ -55,6 +55,19 @@ string NQuads::serializeQuad(const Quad& quad) {
   // TODO: optimization: estimate and reserve output size
   //nquad.reserve(...);
 
+  /* TODO: benchmark and improve these heuristics
+  // estimated size excluding escaping
+  size_t size = 0;
+  size += 1 + s->value.size() + 1 + 1;
+  size += 1 + p->value.size() + 1 + 1;
+  size += 1 + o->value.size() + 1 + 1;
+  //if(g->termType == TermType::NAMED_NODE || g->termType == TermType::BLANK_NODE) {
+  //  size += 1 + g->value.size() + 1;
+  //}
+  size += 2;
+  nquad.reserve(size);
+  */
+
   // subject and predicate can only be named or blank nodes, not literals
   for(Term* t : {s, p}) {
     if(t->termType == TermType::NAMED_NODE) {
