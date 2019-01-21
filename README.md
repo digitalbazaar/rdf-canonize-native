@@ -14,12 +14,14 @@ Introduction
 Installation
 ------------
 
-Currently this module is intended to be used via [rdf-canonize][].
+Currently this module is intended to be used via [rdf-canonize][] but is not a
+direct dependency so must explicitly be installed.
 
 ### node.js + npm
 
 ```
 npm install rdf-canonize
+npm install rdf-canonize-native
 ```
 
 ```js
