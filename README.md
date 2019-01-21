@@ -15,7 +15,7 @@ Installation
 ------------
 
 Currently this module is intended to be used via [rdf-canonize][] but is not a
-direct dependency so must explicitly be installed.
+direct dependency so must be explicitly installed.
 
 ### node.js + npm
 
