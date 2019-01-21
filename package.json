@@ -52,7 +52,7 @@
   ],
   "scripts": {
     "fetch-test-suite": "if [ ! -e test-suites/normalization ]; then git clone --depth 1 https://github.com/json-ld/normalization.git test-suites/normalization; fi",
-    "test": "mocha -R spec --check-leaks conformance-test.js",
+    "test": "mocha -R spec --check-leaks",
     "benchmark": "node benchmark/benchmark.js"
   }
 }

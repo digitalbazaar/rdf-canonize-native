@@ -61,9 +61,9 @@ if(_nodejs) {
   });
 }
 
-const canonize = require('.');
+const canonize = require('..');
 const EarlReport = require('./EarlReport');
-const NQuads = require('./lib/NQuads');
+const NQuads = require('../lib/NQuads');
 
 const _TEST_SUITE_PATHS = [
   program['testDir'],
