@@ -36,8 +36,8 @@ async function a() {
   for(const n of nquads) {
     await canonize.canonize(n, {
       algorithm: 'URDNA2015',
-      inputFormat: 'application/nquads',
-      format: 'application/nquads',
+      inputFormat: 'application/n-quads',
+      format: 'application/n-quads',
       usePureJavaScript: false,
     });
   }
@@ -47,8 +47,8 @@ function b() {
   for(const n of nquads) {
     canonize.canonizeSync(n, {
       algorithm: 'URDNA2015',
-      inputFormat: 'application/nquads',
-      format: 'application/nquads',
+      inputFormat: 'application/n-quads',
+      format: 'application/n-quads',
       usePureJavaScript: false,
     });
   }

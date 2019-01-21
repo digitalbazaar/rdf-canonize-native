@@ -81,8 +81,8 @@ const TEST_TYPES = {
       parseNQuads(readTestNQuads('action')),
       createTestOptions({
         algorithm: 'URGNA2012',
-        inputFormat: 'application/nquads',
-        format: 'application/nquads'
+        inputFormat: 'application/n-quads',
+        format: 'application/n-quads'
       })
     ],
     compare: compareExpectedNQuads
@@ -92,8 +92,8 @@ const TEST_TYPES = {
       parseNQuads(readTestNQuads('action')),
       createTestOptions({
         algorithm: 'URDNA2015',
-        inputFormat: 'application/nquads',
-        format: 'application/nquads'
+        inputFormat: 'application/n-quads',
+        format: 'application/n-quads'
       })
     ],
     compare: compareExpectedNQuads
