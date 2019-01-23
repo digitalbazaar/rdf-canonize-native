@@ -181,9 +181,8 @@ function addTest(manifest, test) {
 
   const testInfo = TEST_TYPES[getTestType(test)];
   const params = testInfo.params.map(param => param(test));
-  // custom params for native only async mode
+  // custom params for native async mode
   const nativeParams = testInfo.params.map(param => param(test));
-  nativeParams[1].usePureJavaScript = false;
   const createCallback = done => (err, result) => {
     try {
       if(err) {

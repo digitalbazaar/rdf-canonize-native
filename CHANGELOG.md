@@ -1,5 +1,9 @@
 # rdf-canonize-native ChangeLog
 
+### Changed
+- **BREAKING**: Remove `usePureJavaScript` option and checks. Use
+  `rdf-canonize` module directly if you want to use JavaScript.
+
 ## 1.0.0 - 2019-01-20
 
 ### Notes

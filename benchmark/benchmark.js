@@ -167,9 +167,8 @@ function addTest(manifest, test) {
   const testInfo = TEST_TYPES[getTestType(test)];
   const params = testInfo.params.map(param => param(test));
 
-  // custom params for native only async mode (if available)
+  // custom params for native async mode
   const nativeParams = testInfo.params.map(param => param(test));
-  nativeParams[1].usePureJavaScript = false;
 
   // NOTE: the below omit error handling. run manifest with test suite first
 
