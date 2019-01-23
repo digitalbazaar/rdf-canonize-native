@@ -48,11 +48,14 @@ const dataset = {
   // ...
 };
 
-// canonize a data set with a particular algorithm
+// canonize a data set with a particular algorithm using callback
 canonize.canonize(dataset, {algorithm: 'URDNA2015'}, function(err, canonical) {
   // ...
 });
 ```
+
+// canonize a data set with a particular algorithm using async/await
+const canonical = canonize.canonize(dataset, {algorithm: 'URDNA2015'});
 
 Related Modules
 ---------------
