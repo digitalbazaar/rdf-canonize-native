@@ -9,7 +9,7 @@
 
 'use strict';
 
-// detect node.js (vs. phantomJS)
+// detect node.js (vs. browser)
 const _nodejs = (typeof process !== 'undefined' &&
   process.versions && process.versions.node);
 
