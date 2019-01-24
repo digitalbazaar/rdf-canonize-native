@@ -1,5 +1,8 @@
 # rdf-canonize-native ChangeLog
 
+### Changed
+- Remove use of deprecated `util.isUndefined()`.
+
 ## 1.1.0 - 2019-01-23
 
 ### Changed
