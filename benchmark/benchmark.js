@@ -6,6 +6,7 @@
  *
  * Copyright (c) 2017 Digital Bazaar, Inc. All rights reserved.
  */
+/* eslint-disable indent */
 (function() {
 
 'use strict';
@@ -75,8 +76,8 @@ suite
   })
   .on('cycle', event => {
     console.log(String(event.target));
-    const s = event.target.stats;
     /*
+    const s = event.target.stats;
     console.log(`  min:${Math.min(...s.sample)} max:${Math.max(...s.sample)}`);
     console.log(`  deviation:${s.deviation} mean:${s.mean}`);
     console.log(`  moe:${s.moe} rme:${s.rme}% sem:${s.sem} var:${s.variance}`);

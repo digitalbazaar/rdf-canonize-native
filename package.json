@@ -36,6 +36,8 @@
     "benchmark": "^2.1.4",
     "chai": "^4.2.0",
     "commander": "^2.19.0",
+    "eslint": "^5.14.1",
+    "eslint-config-digitalbazaar": "^1.6.0",
     "mocha": "^5.2.0",
     "uuid": "^3.3.2"
   },
@@ -53,6 +55,7 @@
   "scripts": {
     "fetch-test-suite": "if [ ! -e test-suites/normalization ]; then git clone --depth 1 https://github.com/json-ld/normalization.git test-suites/normalization; fi",
     "test": "mocha -R spec --check-leaks",
-    "benchmark": "node benchmark/benchmark.js"
+    "benchmark": "node benchmark/benchmark.js",
+    "lint": "eslint 'lib/*.js' 'benchmark/*.js' 'test/*.js'"
   }
 }
