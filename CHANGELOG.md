@@ -1,6 +1,6 @@
 # rdf-canonize-native ChangeLog
 
-## 1.1.2 - 2019-xx-xx
+## 1.1.2 - 2019-02-21
 
 ### Fixed
 - Fix triple comparator in n-quads parser.
