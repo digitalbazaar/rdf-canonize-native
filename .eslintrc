@@ -1,9 +1,0 @@
-{
-  "env": {
-    "browser": true,
-    "mocha": true
-  },
-  "rules": {
-    "indent": ["error", 2, {"outerIIFEBody": 0}]
-  }
-}
